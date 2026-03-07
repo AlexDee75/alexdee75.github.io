@@ -895,8 +895,10 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
 
           <div class="contact-card">
             <h3>Richiedi informazioni</h3>
-            <form action="https://formspree.io/f/mbdzjnoy" method="POST" accept-charset="UTF-8">
-          <input type="hidden" name="_subject" value="Nuova richiesta dal sito web" />
+            <form id="contactForm" action="https://formspree.io/f/mbdzjnoy" method="POST" accept-charset="UTF-8">
+              <input type="hidden" name="_subject" value="Nuova richiesta dal sito web" />
+              <input type="hidden" name="_language" value="it" />
+              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none;" aria-hidden="true" />
               <div class="field-row">
                 <label>
                   Nome e cognome
@@ -935,8 +937,9 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
               </label>
 
               <div>
-                <button type="submit" class="cta">Invia richiesta</button>
+                <button type="submit" class="cta" id="contactSubmitBtn">Invia richiesta</button>
               </div>
+              <p id="formStatus" class="small" role="status" aria-live="polite" style="margin:10px 0 0;"></p>
             </form>
           </div>
         </div>
@@ -1010,6 +1013,63 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
     if (cookieInfoBtn) {
       cookieInfoBtn.addEventListener('click', () => {
         window.location.href = 'privacy.html';
+      });
+    }
+
+    const contactForm = document.getElementById('contactForm');
+    const formStatus = document.getElementById('formStatus');
+    const contactSubmitBtn = document.getElementById('contactSubmitBtn');
+
+    if (contactForm) {
+      contactForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        if (formStatus) {
+          formStatus.textContent = 'Invio in corso...';
+        }
+
+        if (contactSubmitBtn) {
+          contactSubmitBtn.disabled = true;
+          contactSubmitBtn.textContent = 'Invio...';
+        }
+
+        try {
+          const response = await fetch(contactForm.action, {
+            method: 'POST',
+            body: new FormData(contactForm),
+            headers: {
+              'Accept': 'application/json'
+            }
+          });
+
+          if (response.ok) {
+            contactForm.reset();
+            if (formStatus) {
+              formStatus.textContent = 'Richiesta inviata con successo. Riceverai un riscontro al più presto.';
+            }
+          } else {
+            let errorMessage = 'Invio non riuscito. Controlla i campi e riprova.';
+            try {
+              const data = await response.json();
+              if (data && Array.isArray(data.errors) && data.errors.length > 0 && data.errors[0].message) {
+                errorMessage = data.errors[0].message;
+              }
+            } catch (error) {
+            }
+            if (formStatus) {
+              formStatus.textContent = errorMessage;
+            }
+          }
+        } catch (error) {
+          if (formStatus) {
+            formStatus.textContent = 'Errore di connessione. Riprova tra qualche minuto.';
+          }
+        } finally {
+          if (contactSubmitBtn) {
+            contactSubmitBtn.disabled = false;
+            contactSubmitBtn.textContent = 'Invia richiesta';
+          }
+        }
       });
     }
   </script>
