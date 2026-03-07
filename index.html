@@ -895,10 +895,9 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
 
           <div class="contact-card">
             <h3>Richiedi informazioni</h3>
-            <form id="contactForm" action="https://formspree.io/f/mbdzjnoy" method="POST" accept-charset="UTF-8">
-              <input type="hidden" name="_subject" value="Nuova richiesta dal sito web" />
-              <input type="hidden" name="_language" value="it" />
-              <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" style="display:none;" aria-hidden="true" />
+            <form id="contactForm" action="https://formspree.io/f/mbdzjnoy" method="POST" accept-charset="UTF-8" novalidate>
+          <input type="hidden" name="_subject" value="Nuova richiesta dal sito web" />
+              <input type="text" name="_gotcha" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
               <div class="field-row">
                 <label>
                   Nome e cognome
@@ -939,7 +938,7 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
               <div>
                 <button type="submit" class="cta" id="contactSubmitBtn">Invia richiesta</button>
               </div>
-              <p id="formStatus" class="small" role="status" aria-live="polite" style="margin:10px 0 0;"></p>
+              <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
             </form>
           </div>
         </div>
@@ -1017,53 +1016,54 @@ Il servizio verrà erogato in conformità con quanto disposto dal codice deontol
     }
 
     const contactForm = document.getElementById('contactForm');
-    const formStatus = document.getElementById('formStatus');
     const contactSubmitBtn = document.getElementById('contactSubmitBtn');
+    const formStatus = document.getElementById('formStatus');
+
+    function setFormStatus(message, type) {
+      if (!formStatus) return;
+      formStatus.textContent = message;
+      formStatus.className = 'form-status show ' + type;
+    }
 
     if (contactForm) {
       contactForm.addEventListener('submit', async (event) => {
         event.preventDefault();
 
-        if (formStatus) {
-          formStatus.textContent = 'Invio in corso...';
+        if (!contactForm.checkValidity()) {
+          contactForm.reportValidity();
+          setFormStatus('Controlla i campi obbligatori e conferma l\'informativa privacy.', 'error');
+          return;
         }
 
         if (contactSubmitBtn) {
           contactSubmitBtn.disabled = true;
-          contactSubmitBtn.textContent = 'Invio...';
+          contactSubmitBtn.textContent = 'Invio in corso...';
         }
+
+        setFormStatus('Invio in corso...', 'success');
 
         try {
           const response = await fetch(contactForm.action, {
             method: 'POST',
             body: new FormData(contactForm),
             headers: {
-              'Accept': 'application/json'
+              Accept: 'application/json'
             }
           });
 
+          const data = await response.json().catch(() => ({}));
+
           if (response.ok) {
             contactForm.reset();
-            if (formStatus) {
-              formStatus.textContent = 'Richiesta inviata con successo. Riceverai un riscontro al più presto.';
-            }
+            setFormStatus('Richiesta inviata correttamente. Ti ricontatteremo al più presto.', 'success');
           } else {
-            let errorMessage = 'Invio non riuscito. Controlla i campi e riprova.';
-            try {
-              const data = await response.json();
-              if (data && Array.isArray(data.errors) && data.errors.length > 0 && data.errors[0].message) {
-                errorMessage = data.errors[0].message;
-              }
-            } catch (error) {
-            }
-            if (formStatus) {
-              formStatus.textContent = errorMessage;
-            }
+            const message = data.errors && data.errors.length
+              ? data.errors.map((item) => item.message).join(' ')
+              : 'Invio non riuscito. Riprova tra qualche minuto.';
+            setFormStatus(message, 'error');
           }
         } catch (error) {
-          if (formStatus) {
-            formStatus.textContent = 'Errore di connessione. Riprova tra qualche minuto.';
-          }
+          setFormStatus('Impossibile inviare la richiesta. Verifica la connessione o riprova più tardi.', 'error');
         } finally {
           if (contactSubmitBtn) {
             contactSubmitBtn.disabled = false;
