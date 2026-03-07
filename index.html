@@ -160,7 +160,7 @@
 
     .hero-visual {
       position: relative;
-      min-height: 430px;
+      min-height: clamp(240px, 42vw, 430px);
       border-radius: 30px;
       overflow: hidden;
       margin-bottom: 28px;
@@ -168,7 +168,7 @@
       box-shadow: var(--shadow);
       background:
         linear-gradient(180deg, rgba(5,10,20,0.18), rgba(5,10,20,0.72)),
-        url('banner.png') center/cover no-repeat;
+        url('banner.png') center 35% / cover no-repeat;
     }
 
     .hero-visual::before {
@@ -491,12 +491,34 @@
 
     .portrait-image {
       width: 100%;
-      height: 100%;
-      min-height: 380px;
-      object-fit: cover;
+      height: auto;
+      min-height: 0;
+      aspect-ratio: 4 / 5;
+      object-fit: contain;
+      object-position: center top;
       border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.08);
       box-shadow: var(--shadow);
+      background: rgba(255,255,255,0.03);
+    }
+
+    .hero-gallery {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .hero-thumb {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      min-height: 120px;
+      border-radius: 14px;
+      object-fit: contain;
+      object-position: center;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 6px;
     }
 
     .cookie-banner {
@@ -595,6 +617,16 @@
       .grid-2 {
         grid-template-columns: 1fr;
       }
+
+      .hero-visual {
+        min-height: clamp(220px, 38vw, 320px);
+        background-position: center 30%;
+      }
+
+      .portrait-image {
+        max-height: 560px;
+        margin-inline: auto;
+      }
     }
 
     @media (max-width: 720px) {
@@ -650,6 +682,32 @@
       .contact-card { padding: 22px; }
       .nav-links { gap: 14px; width: 100%; }
       .nav-links a { padding: 6px 0; }
+
+      .hero-visual {
+        min-height: 200px;
+        border-radius: 22px;
+        background-position: center 26%;
+      }
+
+      .hero-overlay {
+        padding: 20px;
+      }
+
+      .hero-gallery {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-thumb {
+        aspect-ratio: auto;
+        min-height: 0;
+        max-height: 260px;
+      }
+
+      .portrait-image {
+        width: min(100%, 420px);
+        aspect-ratio: auto;
+        max-height: none;
+      }
     }
   </style>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -707,11 +765,11 @@
             <span class="badge">Chi sono</span>
             <p class="small"></p>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
-              <img src="me.PNG" alt="Studio legale" style="border-radius:14px; object-fit:cover; height:120px; width:100%;" />
-              <img src="me2.png" alt="Scrivania avvocato" style="border-radius:14px; object-fit:cover; height:120px; width:100%;" />
-              <img src="me4.png" alt="Biblioteca legale" style="border-radius:14px; object-fit:cover; height:120px; width:100%;" />
-              <img src="me5.png" alt="Documenti legali" style="border-radius:14px; object-fit:cover; height:120px; width:100%;" />
+            <div class="hero-gallery">
+              <img src="me.PNG" alt="Studio legale" class="hero-thumb" loading="lazy" />
+              <img src="me2.png" alt="Scrivania avvocato" class="hero-thumb" loading="lazy" />
+              <img src="me4.png" alt="Biblioteca legale" class="hero-thumb" loading="lazy" />
+              <img src="me5.png" alt="Documenti legali" class="hero-thumb" loading="lazy" />
             </div>
           </div>
         </aside>
